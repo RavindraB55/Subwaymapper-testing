@@ -1,5 +1,8 @@
 from subwaymapper.models import *
 from subwaymapper.repository import *
+import pandas as pd
+import numpy as np
+import itertools
 import os
 import hashlib
 from subwaymapper import login_manager
@@ -77,3 +80,40 @@ class UserService:
 		result = self.repository.get_actual_user_by_email(email)
         
 		return result
+
+
+class ScheduleService:
+
+    def __init__(self):
+        self.repository = ScheduleRepository()
+
+    def get_schedules_by_line(self,
+                               line: Schedule):
+        result = self.repository.get_schedules_by_line(line)
+        array = []
+
+        for record in result:
+            array.append(Schedule.from_mongo(record))
+
+        return array
+
+    def get_schedules_by_line_direction(self,
+                               line: Schedule,
+							   direction: Schedule):
+        result = self.repository.get_schedules_by_line_direction(line,direction)
+        array = []
+
+        for record in result:
+            array.append(Schedule.from_mongo(record))
+
+        return array
+
+    def get_schedules_by_line_as_dict(self,
+                               line: Schedule):
+        result = self.repository.get_schedules_by_line(line)
+        array = []
+
+        for record in result:
+            array.append(record)
+
+        return array

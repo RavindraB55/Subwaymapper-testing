@@ -8,11 +8,16 @@ from flask_login import login_user, current_user, logout_user, login_required
 from flask import request
 
 user_service = UserService()
+schedule_service = ScheduleService()
 i = 0
 
 @app.route('/')
 def home():
-	return render_template('home.html', title='Home')
+	x = schedule_service.get_schedules_by_line("Trains/1")
+	#x = schedule_service.get_schedules_by_line_as_dict("Trains/1")
+	#names = x[0].keys()
+	#print(x[0].line)
+	return render_template('home.html', title='Home', crown=x)
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
@@ -33,7 +38,8 @@ def register():
 def login():
 	form = LoginForm()
 	if form.validate_on_submit():
-		if ~user_service.confirm_unique_email(form.email.data):
+		x = user_service.confirm_unique_email(form.email.data)
+		if x == False:
 			if user_service.login_user(form.email.data,form.password.data):
 				flash('You have been logged in!', 'success')
 				user = user_service.get_actual_user_by_email(form.email.data)
@@ -46,7 +52,7 @@ def login():
 
 @app.route("/trains")
 def trains():
-	return ('You are on the trains page')
+	return render_template('about.html', title='About')
 
 @app.route("/logout")
 def logout():
@@ -56,4 +62,8 @@ def logout():
 @app.route("/account")
 @login_required
 def account():
-		return render_template('account.html', title='Account')
+	return render_template('account.html', title='Account')
+
+@app.route("/about")
+def about():
+	return render_template('about.html', title='About')
