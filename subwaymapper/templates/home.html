@@ -3,5 +3,28 @@
 {% block content %}
 
 <h1>WE ARE ON THE HOME PAGE</h1>
+<table>
+    <tr>
+        {% for heading in crown[0].schedule.keys() %}
+        <th>{{ heading }}</th>
+        {% endfor %}
+    </tr>
+    
+    <tr>{{ crown[0].schedule.values() }}</tr>
+    {% for cell in crown[0].schedule.values() %}
+    <tr>
+        <td>{{ cell }}</td>
+
+    </tr>
+    {% endfor %}
+</table>
+
+<p>{{ names }} </p>
+
+{% for query in crown %}
+<p>{{ query.schedule.keys() }}</p>
+<p>{{ query.schedule.values() }}</p>
+
+{% endfor %}
 
 {% endblock content %}

@@ -1,25 +1,58 @@
-from sqlalchemy import create_engine, Integer, String, Column, Date, ForeignKey, \
-    PrimaryKeyConstraint, func, desc, MetaData, Table
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, backref, relationship
+import pandas as pd
+import os
+import pymongo
+from pymongo import MongoClient
+import re
+import numpy as np
+from os import walk
+from os import listdir
+from os.path import isfile, join
 
-engine = create_engine('mysql+pymysql://root:!57aOxX$sa*l@localhost/ece464-final', echo=True)
-connection = engine.connect()
+# Local imports
+from subwaymapper.models import *
+from subwaymapper.service import *
+from subwaymapper.repository import *
 
-Session = sessionmaker(bind=engine)
-session = Session()
-Base = declarative_base()
-metadata = MetaData(engine)
+def init_schedule_db():
+   
+    schedule_repository = ScheduleRepository()
+    schedule_repository.clear_db()
 
-def init_users_db():
-	
-	users = Table('users', metadata,
-				Column('user_id', Integer, primary_key=True),
-				Column('email', String(50)),
-				Column('password', String(160)),
-				Column('is_admin', Integer, default = 0))
-	
-	metadata.drop_all()
-	metadata.create_all()
+    onlyfiles = [f for f in listdir('Trains') if isfile(join('Trains', f))]
 
-#init_users_db()
+    filtered = list(filter(lambda k: 'csv' in k, onlyfiles))
+
+    for i in range(len(filtered)):
+        filename = str(filtered[i])
+        filename = 'Trains/' + filename
+        df = pd.read_csv(filename)
+        stations = df.columns.values.tolist()
+
+        split_file_name = filename.split('-')
+
+        line = str(split_file_name[0])
+        direction = str(split_file_name[-2])
+        direction = direction + '-bound'
+
+        print(line)
+        print(direction)
+
+        documents_array = []
+
+        for index, row in df.iterrows():
+            test_keys = stations
+            test_values = row
+            res = {test_keys[i]: test_values[i] for i in range(len(test_keys))}
+            # res['Line'] = line
+            # res['Direction'] = direction
+
+            train = {
+                "Line": line,
+                "Direction": direction,
+                "Schedule": res
+            }
+
+            documents_array.append(train)
+
+        schedule_repository.bulk_insert_schedules(documents_array)
+        # collection.insert_many(documents_array)

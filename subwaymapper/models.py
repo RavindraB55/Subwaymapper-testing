@@ -1,3 +1,4 @@
+from __future__ import annotations
 from sqlalchemy import create_engine, Integer, String, Column, Date, ForeignKey, \
     PrimaryKeyConstraint, func, desc, MetaData, Table
 from sqlalchemy.ext.declarative import declarative_base
@@ -30,3 +31,53 @@ class User(Base, UserMixin):
 			'is_admin': self.is_admin
 		}
 		return "{0},{1},{2},{3}".format(self.id, self.email, self.password, self.is_admin)
+
+
+class Schedule:
+    def __init__(self,
+                 line: str = None,
+                 direction: str = None,
+                 schedule: [] = None):
+        self.line = line
+        self.direction = direction
+        self.schedule = schedule
+    '''
+    @property
+    def line(self):
+        return self.line
+
+    @line.setter
+    def line(self, value):
+        self.line = value
+        return self
+
+    @property
+    def direction(self):
+        return self.direction
+
+    @direction.setter
+    def direction(self, value):
+        self.direction = value
+        return self
+
+    @property
+    def schedule(self):
+        return self.schedule
+
+    @schedule.setter
+    def schedule(self, value):
+        self.schedule = value
+        return self
+    '''
+    @classmethod
+    def from_mongo(cls, query: {}) -> Schedule:
+        '''
+        Creates a Schedule object from Mongo query result
+        :param schedule: a Mongo db querey result
+        :return: A SubwayStation object with properties equal to the property of the node
+        '''
+        return cls(
+            line=query['Line'],
+            direction=query['Direction'],
+            schedule=query['Schedule']
+        )

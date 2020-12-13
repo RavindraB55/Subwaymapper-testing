@@ -1,6 +1,11 @@
 from subwaymapper.models import *
+import pymongo
 
-engine = create_engine('mysql+pymysql://root:!57aOxX$sa*l@localhost/ece464-final', echo=True)
+client = pymongo.MongoClient('mongodb://localhost:27017/')
+client.start_session()
+collection = client['Train']['schedule']
+
+engine = create_engine('mysql+pymysql://root:password@localhost/ece464-final', echo=True)
 connection = engine.connect()
 
 Session = sessionmaker(bind=engine)
@@ -51,3 +56,35 @@ class UserRepository:
 		query = session.query(User).filter(User.id == id).first()
 
 		return query
+
+class ScheduleRepository:
+    def __init__(self):
+        self.collection = collection
+
+
+    def get_schedules_by_line(self, line):
+        schedules = []
+        x = str(line)
+        result = self.collection.find(
+            {"Line": x},
+            {"_id": 0}
+        )
+        return result
+
+    def get_schedules_by_line_direction(self, line, direction):
+        schedules = []
+        x = str(line)
+        result = self.collection.find(
+            {"Line": x,
+			"Direction": direction},
+            {"_id": 0}
+        )
+        return result
+
+
+    def bulk_insert_schedules(self, schedules):
+        self.collection.insert_many(schedules)
+
+
+    def clear_db(self):
+        collection.delete_many({})

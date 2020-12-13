@@ -11,3 +11,10 @@ login_manager.login_message_category = 'info'
 from subwaymapper import routes
 from subwaymapper import models
 from subwaymapper import service
+from subwaymapper import database
+from subwaymapper.database import *
+
+#init_schedule_db()
+schedule_service = ScheduleService()
+x = schedule_service.get_schedules_by_line("Trains/1")
+print(x[0].line)
